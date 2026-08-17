@@ -4,7 +4,7 @@
   "private": true,
   "description": "Find your event photos from Google Drive using three selfies",
   "scripts": {
-    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "install:all": "cd backend && npm install --include=dev && cd ../frontend && npm install --include=dev",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "build:frontend": "cd frontend && npm run build",

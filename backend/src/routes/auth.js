@@ -27,18 +27,36 @@ const router = Router();
 const OAUTH_SCOPES = ['openid', 'email', 'profile'];
 const STATE_COOKIE = 'eps_oauth_state';
 
-function oauthClient() {
-  const { clientId, clientSecret, redirectUri } = config.googleOAuth;
+/**
+ * Where Google sends the participant back to. Configured explicitly when the
+ * frontend runs on its own host; otherwise worked out from the request, so a
+ * fresh deployment needs no extra setting. Must match a redirect URI
+ * registered on the OAuth client either way.
+ */
+function callbackUrl(req) {
+  if (config.googleOAuth.redirectUri) return config.googleOAuth.redirectUri;
+
+  const protocol = req.get('x-forwarded-proto') ?? req.protocol;
+  return `${protocol}://${req.get('host')}/api/auth/google/callback`;
+}
+
+function oauthClient(req) {
+  const { clientId, clientSecret } = config.googleOAuth;
 
   if (!clientId || !clientSecret) {
     throw new AppError('Google sign-in is not configured on this server.', 503);
   }
-  return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
+  return new google.auth.OAuth2(clientId, clientSecret, callbackUrl(req));
+}
+
+/** Where to land after signing in: this same site when it serves the pages. */
+function homeUrl() {
+  return config.serveFrontend ? '/' : config.frontendUrl;
 }
 
 /** GET /api/auth/google — start the login flow. */
 router.get('/google', (req, res) => {
-  const client = oauthClient();
+  const client = oauthClient(req);
 
   // Random state, echoed back by Google, so another site cannot trigger a
   // login callback on a visitor's behalf.
@@ -61,7 +79,7 @@ router.get('/google/callback', async (req, res) => {
     throw new AppError('Sign-in could not be verified. Please try again.', 400);
   }
 
-  const client = oauthClient();
+  const client = oauthClient(req);
   const { tokens } = await client.getToken(String(code));
 
   // The ID token is signed by Google; verifying it proves who the user is
@@ -84,7 +102,7 @@ router.get('/google/callback', async (req, res) => {
   });
 
   res.cookie(SESSION_COOKIE, createSessionToken(user.id), cookieOptions());
-  res.redirect(config.frontendUrl);
+  res.redirect(homeUrl());
 });
 
 /** GET /api/auth/me — who is signed in. */

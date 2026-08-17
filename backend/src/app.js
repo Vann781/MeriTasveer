@@ -19,6 +19,9 @@ export function createApp(services = {}) {
   const app = express();
 
   app.disable('x-powered-by');
+  // Behind Render's load balancer: lets the app see the real protocol and
+  // client IP rather than the proxy's.
+  if (config.nodeEnv === 'production') app.set('trust proxy', 1);
   app.use(cors({ origin: config.corsOrigin, credentials: true }));
   app.use(express.json());
 
