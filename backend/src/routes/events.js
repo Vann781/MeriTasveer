@@ -22,6 +22,8 @@ router.get('/', (req, res) => {
     name: event.name,
     status: event.status,
     photoCount: event.photo_count,
+    // No faces means nobody can be found here, whatever the photo count says.
+    faceCount: event.face_count,
   }));
 
   res.json(events);

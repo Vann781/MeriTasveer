@@ -18,10 +18,10 @@ export function EventsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // An event with no indexed photos cannot return results, so it is not
+  // An event with no recognisable faces cannot return results, so it is not
   // offered — better than letting someone search and always find nothing.
-  const ready = events.filter((event) => event.status === 'ready' && event.photoCount > 0);
-  const preparing = events.filter((event) => event.status !== 'ready');
+  const ready = events.filter((event) => event.status === 'ready' && event.faceCount > 0);
+  const preparing = events.filter((event) => !ready.includes(event));
 
   return (
     <Screen

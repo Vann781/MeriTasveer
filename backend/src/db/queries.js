@@ -56,13 +56,20 @@ export function upsertEvent(db, { driveFolderId, name }) {
     .get(driveFolderId, name);
 }
 
-/** Events with their indexed photo counts, ready for the events list. */
+/**
+ * Events with their photo and face counts, for the participant list.
+ * An event with photos but no faces cannot match anyone, so the count is
+ * needed to decide whether it is worth offering.
+ */
 export function listEvents(db) {
   return db
     .prepare(
-      `SELECT e.*, COUNT(p.id) AS photo_count
+      `SELECT e.*,
+              COUNT(DISTINCT p.id) AS photo_count,
+              COUNT(f.id)          AS face_count
        FROM events e
        LEFT JOIN photos p ON p.event_id = e.id
+       LEFT JOIN face_embeddings f ON f.photo_id = p.id
        GROUP BY e.id
        ORDER BY e.name COLLATE NOCASE`,
     )
