@@ -1,0 +1,53 @@
+# Render blueprint. One web service serves both the API and the built frontend,
+# so the browser sees a single origin and the login cookie keeps working.
+#
+# Secrets are deliberately marked sync:false — Render will prompt for them
+# rather than storing them in this file. Never commit real values here.
+#
+# Memory: the default face models need roughly 700 MB while indexing. The
+# "standard" plan (2 GB) is the smallest that comfortably fits; "starter"
+# (512 MB) will be killed. See the Deploying section of the README.
+
+services:
+  - type: web
+    name: meritasveer
+    runtime: node
+    plan: standard
+    region: singapore
+    buildCommand: npm run install:all && npm run build:frontend && npm run models:download
+    startCommand: node backend/src/server.js
+    healthCheckPath: /api/health
+
+    # The database and the downloaded models live here so a redeploy does not
+    # wipe the index.
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 2
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: /var/data/photo_finder.db
+
+      # Supplied through the Render dashboard, not stored in the repo.
+      - key: GOOGLE_DRIVE_ROOT_FOLDER_ID
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: FACE_MATCH_THRESHOLD
+        value: "0.40"
+      - key: SEARCH_SESSION_TTL_MINUTES
+        value: "120"

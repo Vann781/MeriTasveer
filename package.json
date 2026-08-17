@@ -1,0 +1,21 @@
+{
+  "name": "meritasveer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Find your event photos from Google Drive using three selfies",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "cd backend && npm test",
+    "test:drive": "cd backend && npm run test:drive",
+    "start": "node backend/src/server.js",
+    "models:download": "cd backend && npm run models:download",
+    "index": "cd backend && npm run index",
+    "calibrate": "cd backend && npm run calibrate",
+    "test:face": "cd backend && npm run test:face",
+    "test:heic": "cd backend && npm run test:heic",
+    "test:search": "cd backend && npm run test:search"
+  }
+}

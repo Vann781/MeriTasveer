@@ -1,0 +1,33 @@
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+credentials/
+
+# Database
+*.db
+*.db-journal
+data/
+
+# Temporary image processing
+uploads/
+temp/
+
+# Face recognition model weights (~190 MB, fetched by npm run models:download)
+models/
+*.onnx
+
+# Personal test selfies — never commit someone's face
+vayu/
+
+# Dependencies / build output
+node_modules/
+dist/
+
+# Logs / editor / OS noise
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
