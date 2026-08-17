@@ -17,5 +17,8 @@
     "test:face": "cd backend && npm run test:face",
     "test:heic": "cd backend && npm run test:heic",
     "test:search": "cd backend && npm run test:search"
+  },
+  "engines": {
+    "node": ">=20.11"
   }
 }
