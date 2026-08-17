@@ -79,10 +79,13 @@ export function readCookie(req, name) {
 }
 
 export function cookieOptions({ days = SESSION_DAYS } = {}) {
+  const sameSite = config.cookieSameSite;
+
   return {
     httpOnly: true,
-    sameSite: 'lax',
-    secure: config.nodeEnv === 'production',
+    sameSite,
+    // SameSite=None is only honoured on a secure connection.
+    secure: sameSite === 'none' || config.nodeEnv === 'production',
     maxAge: days * 24 * 60 * 60 * 1000,
     path: '/',
   };

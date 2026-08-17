@@ -158,8 +158,18 @@ npm test               # the unit test suite
 
 ## Deploying
 
-The backend serves the built frontend in production, so it runs as **one** service on one origin.
-That matters: split across two hosts, the login cookie becomes cross-site and browsers drop it.
+The login cookie decides the shape of the deployment. It is `SameSite=Lax`, so the browser only
+sends it when the page and the API share an origin. Two arrangements achieve that:
+
+**One service (simplest).** The backend serves the built frontend, so there is only one origin.
+
+**Two services with a proxy.** A static site hosts the frontend and rewrites `/api/*` to the
+backend. The browser still sees one origin. `render.yaml` is set up this way — set
+`SERVE_FRONTEND=false` on the API service.
+
+Putting the frontend on a genuinely different site works only with `COOKIE_SAMESITE=none`, and
+Safari and iOS block third-party cookies outright, so sign-in fails there. Avoid it unless both
+hosts share a parent domain (`app.example.com` and `api.example.com`).
 
 ```bash
 npm run install:all && npm run build:frontend && npm run models:download
@@ -210,6 +220,9 @@ HTTPS is required in production — browsers will not open a camera on a plain `
 | `FACE_MATCH_THRESHOLD` | `0.40` | Cosine similarity for a match |
 | `SEARCH_SESSION_TTL_MINUTES` | `120` | How long results stay reachable |
 | `CORS_ORIGIN` | `http://localhost:5173` | Only used when the frontend is served separately |
+| `SERVE_FRONTEND` | on in production | Set `false` when the frontend is its own service |
+| `FRONTEND_URL` | `CORS_ORIGIN` | Where to land after sign-in, when not serving the frontend |
+| `COOKIE_SAMESITE` | `lax` | `none` only for a genuinely cross-site frontend |
 
 ---
 

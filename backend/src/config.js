@@ -34,12 +34,28 @@ export const config = Object.freeze({
   },
 
   /**
-   * In production one service serves both the API and the built frontend, so
-   * they share an origin. That keeps the login cookie working: separate
-   * hosts on onrender.com are cross-site, and the browser would drop it.
+   * Whether this process also serves the built frontend. Defaults on in
+   * production, where one service hosting both keeps the login cookie
+   * first-party. Set SERVE_FRONTEND=false when the frontend is deployed
+   * separately.
    */
-  serveFrontend: process.env.SERVE_FRONTEND === 'true' || process.env.NODE_ENV === 'production',
+  serveFrontend:
+    process.env.SERVE_FRONTEND !== undefined
+      ? process.env.SERVE_FRONTEND === 'true'
+      : process.env.NODE_ENV === 'production',
   frontendDist: path.resolve(backendRoot, '..', 'frontend', 'dist'),
+
+  /**
+   * SameSite policy for the login cookie.
+   *
+   * "lax" is right whenever the browser sees one origin — either one service
+   * serving both, or a frontend that proxies /api to the backend.
+   *
+   * "none" is required if the frontend really is on another site, and forces
+   * Secure. Be aware that Safari and iOS block third-party cookies outright,
+   * so sign-in will fail there. Prefer a proxy or a shared parent domain.
+   */
+  cookieSameSite: process.env.COOKIE_SAMESITE || 'lax',
 
   // Phase 7 — participant Google login. Placeholders for now.
   googleOAuth: {
